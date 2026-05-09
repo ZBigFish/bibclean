@@ -1,5 +1,7 @@
 <div align="center">
 
+# Bibclean: Automatically Remove Unused Entries from BibTeX Files
+
 <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/tests-81%2F81%20passed-brightgreen?style=flat-square" alt="Tests">
 <img src="https://img.shields.io/github/license/ZBigFish/bibclean?style=flat-square" alt="License">
@@ -7,11 +9,9 @@
 
 </div>
 
-# bibclean
+> 中文文档：[README_CN.md](README_CN.md)
 
-> Keep your `.bib` files clean — automatically remove (or comment out) unused bibliography entries based on actual `\cite` usage in your LaTeX project.
-
-[中文文档](#中文文档)
+**Bibclean** scans your LaTeX project, extracts every `\cite{...}` key actually used, and removes (or comments out) unused entries from your `.bib` files. No more bloated bibliography files with hundreds of uncited references.
 
 ---
 
@@ -230,79 +230,6 @@ python tests/test_bib_cleaner.py
 [![Star History Chart](https://api.star-history.com/svg?repos=ZBigFish/bibclean&type=Date)](https://star-history.com/#ZBigFish/bibclean&Date)
 
 ## License
-
-[MIT](LICENSE)
-
----
-
-<br>
-
-# 中文文档
-
-## bibclean
-
-> 根据 LaTeX 论文项目中的实际 `\cite` 引用，自动精简 `.bib` 文献库——移除（或注释）未使用的条目。
-
-## 特性
-
-- **零参数运行** — 在项目根目录直接 `bibclean`，自动完成所有工作
-- **主文件自动检测** — 扫描 `\documentclass` 定位主 `.tex`；多版本时交互选择
-- **非破坏性默认** — 默认生成 `new_XXX.bib`，绝不修改原始文件
-- **`\input`/`\include` 跟踪** — 递归解析所有子 tex 文件，收集完整引用
-- **Bib 自动发现** — 从 `\bibliography{...}` 和 `\addbibresource{...}` 定位正在使用的 bib
-- **crossref 依赖链** — 被引用条目的 `crossref` 父条目自动保留（传递闭包）
-- **注释模式** — `--comment` 用 `%` 注释未引用条目，保持原 bib 结构
-- **安全预览** — `--dry-run` 在修改前预览结果
-
-无需第三方依赖，仅需 **Python 3.10+**。
-
-## 安装
-
-```bash
-git clone https://github.com/ZBigFish/bibclean.git
-cd bibclean
-pip install -e .
-```
-
-安装后即可在任意目录使用 `bibclean` 命令，也可通过 `python -m bibclean` 运行。
-
-## 快速开始
-
-```bash
-cd /path/to/my-paper
-bibclean                # 自动检测、生成 new_refs.bib
-bibclean --dry-run      # 先预览，不修改文件
-bibclean --comment      # 注释未引用条目而非删除
-```
-
-## 模式速查
-
-| 参数 | 输出文件 | 对未引用条目的操作 |
-|---|---|---|
-| *(无)* | `new_XXX.bib` | 删除 |
-| `--comment` | `new_XXX.bib` | 用 `%` 注释 |
-| `--in-place` | 原文件 | 删除 |
-| `--in-place --comment` | 原文件 | 用 `%` 注释 |
-| `--dry-run` | 无 | 仅预览 |
-
-## 支持的引用命令
-
-`\cite` `\citep` `\citet` `\citeauthor` `\citeyear` `\citealp` `\citealt`
-`\parencite` `\textcite` `\footcite` `\autocite` `\supercite` `\fullcite`
-`\Cite` `\Citep` `\Citet` `\cite*` `\nocite{*}`
-
-支持可选参数 `\cite[page 3]{key}`、多键 `\cite{a,b,c}`、`\nocite{*}`。
-
-## 测试
-
-```bash
-python tests/test_bib_cleaner.py
-# 预期：81/81 passed — all passed!
-```
-
-21 个测试用例，覆盖所有模式、边界情况、crossref 链、特殊字符和引用变体。
-
-## 许可证
 
 [MIT](LICENSE)
 
