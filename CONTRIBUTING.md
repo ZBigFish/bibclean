@@ -12,7 +12,10 @@ Thanks for your interest in contributing! Here's how to get started.
 ### Setup
 
 ```bash
-# Fork the repository on GitHub, then clone your fork
+# Install from PyPI (recommended for users)
+pip install bibkit
+
+# For development: fork the repository on GitHub, then clone your fork
 git clone https://github.com/YOUR_USERNAME/bibkit.git
 cd bibkit
 pip install -e .

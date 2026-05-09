@@ -31,6 +31,10 @@
 ## Installation
 
 ```bash
+# From PyPI (recommended)
+pip install bibkit
+
+# Or from source
 git clone https://github.com/ZBigFish/bibkit.git
 cd bibkit
 pip install -e .

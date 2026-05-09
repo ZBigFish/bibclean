@@ -31,6 +31,10 @@
 ## 安装
 
 ```bash
+# 从 PyPI 安装（推荐）
+pip install bibkit
+
+# 或从源码安装
 git clone https://github.com/ZBigFish/bibkit.git
 cd bibkit
 pip install -e .
