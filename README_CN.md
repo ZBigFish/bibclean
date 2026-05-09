@@ -33,6 +33,7 @@
 - [支持的 BibTeX 特性](#支持的-bibtex-特性)
 - [工作原理](#工作原理)
 - [测试](#测试)
+- [如何贡献](#如何贡献)
 - [开源协议](#开源协议)
 
 ---
@@ -224,6 +225,27 @@ python tests/test_bib_cleaner.py
 ```
 
 21 个测试用例，覆盖所有模式、边界情况、crossref 链、特殊字符和引用变体。
+
+## 如何贡献
+
+欢迎贡献代码！无论是 bug 修复、新功能还是文档改进，都可以提交 Pull Request。
+
+```bash
+# fork 仓库并克隆
+git clone https://github.com/YOUR_USERNAME/bibclean.git
+cd bibclean
+pip install -e .
+
+# 创建你的功能分支
+git checkout -b feat/my-feature
+
+# 运行测试确保一切正常
+python tests/test_bib_cleaner.py
+
+# 提交并推送，然后在 GitHub 上发起 Pull Request
+```
+
+详细规范请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 开源协议
 

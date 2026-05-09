@@ -33,6 +33,7 @@
 - [Supported BibTeX Features](#supported-bibtex-features)
 - [How It Works](#how-it-works)
 - [Testing](#testing)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -228,6 +229,27 @@ python tests/test_bib_cleaner.py
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ZBigFish/bibclean&type=Date)](https://star-history.com/#ZBigFish/bibclean&Date)
+
+## Contributing
+
+Contributions are welcome! Whether it's a bug fix, a new feature, or a documentation improvement — feel free to open a pull request.
+
+```bash
+# fork & clone
+git clone https://github.com/YOUR_USERNAME/bibclean.git
+cd bibclean
+pip install -e .
+
+# create a branch for your change
+git checkout -b feat/my-feature
+
+# run the test suite to make sure everything passes
+python tests/test_bib_cleaner.py
+
+# commit & push, then open a PR on GitHub
+```
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
