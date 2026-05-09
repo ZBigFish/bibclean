@@ -1,60 +1,89 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/tests-81%2F81%20passed-brightgreen?style=flat-square" alt="Tests">
+<img src="https://img.shields.io/github/license/ZBigFish/bibclean?style=flat-square" alt="License">
+<img src="https://img.shields.io/badge/platform-cross--platform-lightgrey?style=flat-square" alt="Platform">
+
+</div>
+
 # bibclean
 
-根据 LaTeX 论文项目中对 `.tex` 文件的实际引用，精简 `.bib` 文献库——自动移除（或注释）未被引用的条目。
+> Keep your `.bib` files clean — automatically remove (or comment out) unused bibliography entries based on actual `\cite` usage in your LaTeX project.
+
+[中文文档](#中文文档)
 
 ---
 
-## 特性
+## Table of Contents
 
-- **零参数运行** — 在项目根目录直接运行 `bibclean`，自动完成所有工作
-- **主文件自动检测** — 扫描 `\documentclass` 定位主 `.tex` 入口；多版本时交互选择
-- **非破坏性默认** — 默认生成 `new_XXX.bib`，绝不修改原始文件
-- **`\input`/`\include` 跟踪** — 递归解析所有包含的子 tex 文件，收集完整引用
-- **Bib 自动发现** — 从 `\bibliography{...}` 和 `\addbibresource{...}` 定位正在使用的 bib 文件
-- **crossref 依赖链** — 被引用条目的 `crossref` 父条目自动保留（传递闭包）
-- **注释模式** — `--comment` 将未引用条目用 `%` 注释而非删除，保持原 bib 结构
-- **安全预览** — `--dry-run` 在修改前预览结果
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Examples](#usage-examples)
+  - [1. Default: generate a cleaned new file](#1-default-generate-a-cleaned-new-file)
+  - [2. Comment mode: preserve bib structure](#2-comment-mode-preserve-bib-structure)
+  - [3. In-place modification](#3-in-place-modification)
+  - [4. Protect specific entries](#4-protect-specific-entries)
+  - [5. Multi-version projects](#5-multi-version-projects)
+  - [6. Specify a bib file](#6-specify-a-bib-file)
+  - [7. Limit search scope](#7-limit-search-scope)
+- [Mode Reference](#mode-reference)
+- [Supported Citation Commands](#supported-citation-commands)
+- [Supported BibTeX Features](#supported-bibtex-features)
+- [How It Works](#how-it-works)
+- [Testing](#testing)
+- [License](#license)
 
-## 依赖
+---
 
-仅需 **Python 3.10+**，无第三方库依赖。
+## Features
 
-## 安装
+| | |
+|---|---|
+| **Zero-config default** | Run `bibclean` with no arguments — auto-detects the main `.tex`, finds the right `.bib`, and produces a cleaned copy. |
+| **Main file auto-detection** | Scans for `\documentclass` to identify the entry point. Prompts for choice when multiple versions exist. |
+| **Non-destructive by default** | Writes a new `new_XXX.bib` file. Never touches your originals unless you explicitly ask. |
+| **`\input`/`\include` following** | Recursively resolves included sub-files to collect all citations across the entire project. |
+| **Bib auto-discovery** | Reads `\bibliography{...}` and `\addbibresource{...}` from your main `.tex` to find which `.bib` files are in use. |
+| **`crossref` dependency chain** | Automatically keeps cross-referenced parent entries (transitive closure). |
+| **Comment mode** | `--comment` comments out unused entries with `%` instead of deleting them — preserving your original bib structure. |
+| **Safe preview** | `--dry-run` shows exactly what would change before touching any files. |
+
+No external dependencies — just **Python 3.10+**.
+
+## Installation
 
 ```bash
-pip install -e /path/to/bibdel
+# From source (editable install)
+git clone https://github.com/ZBigFish/bibclean.git
+cd bibclean
+pip install -e .
 ```
 
-或从 PyPI（后续发布）：
+After installation, the `bibclean` command is available globally. You can also run `python -m bibclean`.
+
+## Quick Start
 
 ```bash
-pip install bibclean
-```
-
-安装后即可在任意目录使用 `bibclean` 命令。也可通过 `python -m bibclean` 运行。
-
-## 快速开始
-
-```bash
-# 在论文项目根目录直接运行（默认：生成 new_XXX.bib）
+# Run from your LaTeX project root
+cd /path/to/my-paper
 bibclean
 
-# 指定项目路径
-bibclean /path/to/latex/project
+# Or specify the project path
+bibclean /path/to/my-paper
 
-# 先预览，不修改任何文件
+# Preview before making changes
 bibclean --dry-run
 ```
 
-## 使用案例
+## Usage Examples
 
-### 1. 默认模式：生成精简后的新文件
+### 1. Default: generate a cleaned new file
 
 ```bash
 bibclean /path/to/paper-project
 ```
-
-输出示例：
 
 ```
 Main file: main.tex
@@ -68,22 +97,21 @@ Scanned 8 .tex file(s), found 55 unique citation key(s).
   Entries to removed: 20
     - spencer2016causes
     - goodfellow2014generative
-    - kingma2013auto
     ...
   Wrote to new_refs.bib (20 entries removed).
 
 Done.
 ```
 
-原始 `refs.bib`（75 条）未被修改，`new_refs.bib`（55 条）为新生成的精简文件。
+The original `refs.bib` (75 entries) is untouched. `new_refs.bib` (55 entries) is the cleaned result.
 
-### 2. 注释模式：保留原 bib 结构
+### 2. Comment mode: preserve bib structure
 
 ```bash
 bibclean /path/to/paper-project --comment
 ```
 
-效果：未引用条目的每一行加 `% ` 前缀，已引用条目保持不变，`@string`、`@comment` 块保留原样。
+Unused entries get `% ` prefixed to every line; cited entries remain unchanged:
 
 ```bib
 % @article{goodfellow2014generative,
@@ -98,26 +126,28 @@ bibclean /path/to/paper-project --comment
 }
 ```
 
-### 3. 原地修改
+`@string`, `@comment`, and `@preamble` blocks are always preserved as-is.
+
+### 3. In-place modification
 
 ```bash
-# 直接修改原 bib 文件（移除未引用条目）
+# Remove unused entries directly from the original file
 bibclean --in-place
 
-# 直接修改原 bib 文件（注释未引用条目）
+# Comment out unused entries in the original file
 bibclean --in-place --comment
 ```
 
-### 4. 手动保护特定条目
+### 4. Protect specific entries
 
 ```bash
-# 保留 lecun1998gradient 和 kingma2013auto，即使未被引用
+# Keep selected keys even if not cited
 bibclean --keep "lecun1998gradient,kingma2013auto"
 ```
 
-### 5. 多版本项目
+### 5. Multi-version projects
 
-当项目中存在多个带 `\documentclass` 的 tex 文件（例如论文的多个修订版本）时，程序会列出所有候选项：
+When multiple `.tex` files with `\documentclass` are found (e.g., paper revisions), you'll be prompted:
 
 ```
 Multiple main .tex files detected:
@@ -128,21 +158,122 @@ Multiple main .tex files detected:
 Select main file [1-2]:
 ```
 
-输入序号选择要作为主入口的文件。
-
-### 6. 指定 bib 文件（覆盖自动发现）
+### 6. Specify a bib file
 
 ```bash
+# Override auto-discovery
 bibclean --bib references.bib
 ```
 
-### 7. 仅扫描根目录（不搜索子目录中的 tex 文件）
+### 7. Limit search scope
 
 ```bash
+# Don't search subdirectories for .tex files
+# (still follows \input/\include from the main .tex)
 bibclean --no-recursive
 ```
 
-注意：`--no-recursive` 只影响 glob 级别的 tex 搜索，**不会阻止**主 tex 中 `\input`/`\include` 的子文件引用跟踪。
+## Mode Reference
+
+| Flags | Output File | Action on Unused |
+|---|---|---|
+| *(none)* | `new_XXX.bib` | Remove |
+| `--comment` | `new_XXX.bib` | Comment with `%` |
+| `--in-place` | Original file | Remove |
+| `--in-place --comment` | Original file | Comment with `%` |
+| `--dry-run` *(with any)* | None | Preview only |
+
+## Supported Citation Commands
+
+`\cite` `\citep` `\citet` `\citeauthor` `\citeyear` `\citealp` `\citealt`
+`\parencite` `\textcite` `\footcite` `\autocite` `\supercite` `\fullcite`
+`\Cite` `\Citep` `\Citet` (capitalized) `\cite*` (starred)
+
+Supports optional arguments (`\cite[page 3]{key}`), multi-key (`\cite{key1,key2}`), and `\nocite{*}`.
+
+## Supported BibTeX Features
+
+- All standard entry types: `@article`, `@inproceedings`, `@book`, `@incollection`, `@misc`, and more
+- `@string`, `@comment`, `@preamble` blocks are always preserved
+- Nested braces in field values (`{CNN}`, `{\L}ukasz`) handled correctly
+- `crossref` fields resolved transitively — parent entries kept automatically
+
+## How It Works
+
+```
+Project directory
+  │
+  ├─ Find .tex files with \documentclass ──→ main.tex
+  │
+  ├─ Resolve \input{...} / \include{...} ──→ all .tex files
+  │
+  ├─ Extract \cite{...} keys ──────────────→ cited keys set
+  │
+  ├─ Read \bibliography{...} from main ────→ .bib file(s)
+  │
+  ├─ Parse .bib entries ───────────────────→ entry map
+  │
+  └─ Filter: keep cited + crossref chain ──→ new_XXX.bib
+```
+
+## Testing
+
+```bash
+python tests/test_bib_cleaner.py
+# Expected: 81/81 passed — all passed!
+```
+
+21 test cases covering all modes, edge cases, crossref chains, special characters, and citation pattern variants.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ZBigFish/bibclean&type=Date)](https://star-history.com/#ZBigFish/bibclean&Date)
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+<br>
+
+# 中文文档
+
+## bibclean
+
+> 根据 LaTeX 论文项目中的实际 `\cite` 引用，自动精简 `.bib` 文献库——移除（或注释）未使用的条目。
+
+## 特性
+
+- **零参数运行** — 在项目根目录直接 `bibclean`，自动完成所有工作
+- **主文件自动检测** — 扫描 `\documentclass` 定位主 `.tex`；多版本时交互选择
+- **非破坏性默认** — 默认生成 `new_XXX.bib`，绝不修改原始文件
+- **`\input`/`\include` 跟踪** — 递归解析所有子 tex 文件，收集完整引用
+- **Bib 自动发现** — 从 `\bibliography{...}` 和 `\addbibresource{...}` 定位正在使用的 bib
+- **crossref 依赖链** — 被引用条目的 `crossref` 父条目自动保留（传递闭包）
+- **注释模式** — `--comment` 用 `%` 注释未引用条目，保持原 bib 结构
+- **安全预览** — `--dry-run` 在修改前预览结果
+
+无需第三方依赖，仅需 **Python 3.10+**。
+
+## 安装
+
+```bash
+git clone https://github.com/ZBigFish/bibclean.git
+cd bibclean
+pip install -e .
+```
+
+安装后即可在任意目录使用 `bibclean` 命令，也可通过 `python -m bibclean` 运行。
+
+## 快速开始
+
+```bash
+cd /path/to/my-paper
+bibclean                # 自动检测、生成 new_refs.bib
+bibclean --dry-run      # 先预览，不修改文件
+bibclean --comment      # 注释未引用条目而非删除
+```
 
 ## 模式速查
 
@@ -156,33 +287,28 @@ bibclean --no-recursive
 
 ## 支持的引用命令
 
-程序能识别所有常见的 LaTeX 引用命令变体：
-
 `\cite` `\citep` `\citet` `\citeauthor` `\citeyear` `\citealp` `\citealt`
 `\parencite` `\textcite` `\footcite` `\autocite` `\supercite` `\fullcite`
-`\Cite` `\Citep` `\Citet`（大写变体）`\cite*`（星号变体）
+`\Cite` `\Citep` `\Citet` `\cite*` `\nocite{*}`
 
-支持可选参数：`\cite[page 3]{key}`、`\citep[see][chap 2]{key}`
-支持多键：`\cite{key1,key2,key3}`
-完全支持 `\nocite{*}`（检测到后保留全部条目）
-
-## 支持的 Bib 格式
-
-- 所有标准条目类型：`@article`、`@inproceedings`、`@book`、`@incollection`、`@misc` 等
-- `@string`、`@comment`、`@preamble` 块自动保留
-- 正确处理字段值中的嵌套花括号（如 `{CNN}`、`{\L}ukasz`）
-- 自动解析 `crossref` 字段，保留引用链中的父条目
+支持可选参数 `\cite[page 3]{key}`、多键 `\cite{a,b,c}`、`\nocite{*}`。
 
 ## 测试
 
-项目包含 21 个自动化测试用例，覆盖全部模式、边界情况和引用模式。
-
 ```bash
 python tests/test_bib_cleaner.py
+# 预期：81/81 passed — all passed!
 ```
 
-预期输出：`81/81 passed — all passed!`
+21 个测试用例，覆盖所有模式、边界情况、crossref 链、特殊字符和引用变体。
 
 ## 许可证
 
-MIT
+[MIT](LICENSE)
+
+---
+
+<br>
+<div align="center">
+  <sub>Built with ❤️ for researchers who care about clean bibliographies.</sub>
+</div>
