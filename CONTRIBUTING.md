@@ -1,4 +1,4 @@
-# Contributing to Bibclean
+# Contributing to Bibkit
 
 Thanks for your interest in contributing! Here's how to get started.
 
@@ -13,8 +13,8 @@ Thanks for your interest in contributing! Here's how to get started.
 
 ```bash
 # Fork the repository on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/bibclean.git
-cd bibclean
+git clone https://github.com/YOUR_USERNAME/bibkit.git
+cd bibkit
 pip install -e .
 ```
 
@@ -34,7 +34,7 @@ All 81 checks must pass before submitting a PR.
 
 Open an issue on GitHub with:
 - Your OS and Python version (`python --version`)
-- The exact `bibclean` command you ran
+- The exact `bibkit clean` command you ran
 - A minimal `.tex` and `.bib` snippet that reproduces the issue
 
 ### Suggesting Features
@@ -42,7 +42,7 @@ Open an issue on GitHub with:
 Open an issue with the `enhancement` label. Describe:
 - The use case / problem you're trying to solve
 - How you'd expect the feature to work
-- Why it fits within bibclean's scope
+- Why it fits within bibkit's scope
 
 ### Pull Requests
 
@@ -63,11 +63,11 @@ Open an issue with the `enhancement` label. Describe:
 ## Project Structure
 
 ```
-bibclean/
-├── bibclean/          # Package source
+bibkit/
+├── bibkit/            # Package source
 │   ├── __init__.py
-│   ├── __main__.py    # python -m bibclean entry
-│   └── cli.py         # Core logic + CLI
+│   ├── __main__.py    # python -m bibkit entry
+│   └── cli.py         # Core logic + CLI subcommands
 ├── tests/
 │   ├── fixtures/      # Test project fixtures
 │   │   ├── simple/
@@ -83,4 +83,4 @@ bibclean/
 
 ## Questions?
 
-Open a [discussion](https://github.com/ZBigFish/bibclean/discussions) or file an [issue](https://github.com/ZBigFish/bibclean/issues).
+Open a [discussion](https://github.com/ZBigFish/bibkit/discussions) or file an [issue](https://github.com/ZBigFish/bibkit/issues).

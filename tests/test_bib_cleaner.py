@@ -18,9 +18,9 @@ FAIL = 0
 
 
 def run_cleaner(fixture_path: Path, *args) -> subprocess.CompletedProcess:
-    """Run bibclean CLI on a fixture. Extra args are CLI flags.
+    """Run bibkit clean on a fixture. Extra args are CLI flags.
     If stdin text is the first arg, pipe it in."""
-    cmd = ['bibclean', str(fixture_path)]
+    cmd = ['bibkit', 'clean', str(fixture_path)]
     input_text = None
     for a in args:
         if isinstance(a, str) and a.startswith('STDIN:'):
@@ -411,7 +411,7 @@ def test_cwd_default():
         import os
         os.chdir(str(dst))
         r = subprocess.run(
-            ['bibclean'],
+            ['bibkit', 'clean'],
             capture_output=True, text=True, timeout=30
         )
         check("runs without path argument", r.returncode == 0, r.stderr)

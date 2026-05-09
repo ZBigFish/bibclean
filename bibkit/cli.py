@@ -1,4 +1,4 @@
-"""CLI entry point for bibclean."""
+"""CLI entry point for bibkit."""
 
 import re
 import argparse
@@ -18,7 +18,6 @@ _CITE_CMD_RE = re.compile(
 
 
 def extract_citation_keys(tex_content: str) -> set[str]:
-    """Return the set of citation keys found in .tex content."""
     keys: set[str] = set()
     for match in _CITE_CMD_RE.finditer(tex_content):
         key_list = match.group(1)
@@ -38,7 +37,6 @@ _INPUT_RE = re.compile(r'\\(?:input|include)\s*\{([^}]+)\}')
 
 def resolve_includes(main_tex: Path, project_dir: Path,
                      visited: set[Path] | None = None) -> list[Path]:
-    """Recursively resolve \\input and \\include to collect all .tex files."""
     if visited is None:
         visited = set()
     resolved = [main_tex]
@@ -59,7 +57,6 @@ def resolve_includes(main_tex: Path, project_dir: Path,
 # ── main .tex detection ────────────────────────────────────────────────
 
 def find_main_tex_candidates(project_dir: Path, recursive: bool = True) -> list[Path]:
-    """Return .tex files that contain \\documentclass (main file candidates)."""
     candidates: list[Path] = []
     glob_fn = project_dir.rglob if recursive else project_dir.glob
     for tf in sorted(glob_fn('*.tex')):
@@ -79,7 +76,6 @@ _ADDBIB_RE = re.compile(r'\\addbibresource(?:\[[^\]]*\])?\s*\{([^}]+\.bib)\}')
 
 
 def extract_bib_filenames_from_tex(tex_content: str) -> list[str]:
-    """Extract .bib filenames referenced via \\bibliography or \\addbibresource."""
     names: list[str] = []
     for m in _BIBLIOGRAPHY_RE.finditer(tex_content):
         for raw in m.group(1).split(','):
@@ -97,7 +93,6 @@ def extract_bib_filenames_from_tex(tex_content: str) -> list[str]:
 
 def resolve_bib_files(project_dir: Path, main_tex: Path,
                       specified: str | None) -> list[Path]:
-    """Resolve .bib files. Priority: --bib > auto-discovery from main .tex."""
     if specified:
         for base in [project_dir, main_tex.parent, Path('.')]:
             p = (base / specified).resolve()
@@ -129,7 +124,6 @@ def resolve_bib_files(project_dir: Path, main_tex: Path,
     if bibs:
         return bibs
 
-    # Fallback: glob all .bib in project
     return sorted(project_dir.rglob('*.bib'))
 
 
@@ -140,10 +134,6 @@ _ENTRY_HEAD_RE = re.compile(r'@(\w+)\s*\{\s*([^\s,]+)\s*,')
 
 def parse_bib_entries(bib_path: Path) -> tuple[str, OrderedDict[str, str],
                                                 dict[str, tuple[int, int]]]:
-    """
-    Parse a .bib file into (preamble, entries, entry_positions).
-    entry_positions maps key -> (start_byte, end_byte) in the source file.
-    """
     text = bib_path.read_text(encoding='utf-8', errors='replace')
     entries: OrderedDict[str, str] = OrderedDict()
     entry_positions: dict[str, tuple[int, int]] = {}
@@ -261,7 +251,6 @@ def resolve_crossref_closure(cited: set[str],
 # ── bib writing ────────────────────────────────────────────────────────
 
 def write_bib(path: Path, preamble: str, entries: OrderedDict[str, str]):
-    """Write preamble + selected entries to a .bib file."""
     with open(path, 'w', encoding='utf-8') as f:
         f.write(preamble.rstrip('\n'))
         if preamble and not preamble.endswith('\n'):
@@ -276,10 +265,6 @@ def write_bib(path: Path, preamble: str, entries: OrderedDict[str, str]):
 def write_commented_bib(output_path: Path, source_text: str,
                         entry_positions: dict[str, tuple[int, int]],
                         kept_keys: set[str]):
-    """
-    Write .bib with unused entries commented out (% prefix per line).
-    Preserves all preamble text, @string blocks, and entry ordering.
-    """
     sorted_entries = sorted(entry_positions.items(), key=lambda x: x[1][0])
 
     parts: list[str] = []
@@ -303,58 +288,19 @@ def write_commented_bib(output_path: Path, source_text: str,
     output_path.write_text(''.join(parts), encoding='utf-8')
 
 
-# ── old-style scanning (fallback when no \\documentclass detected) ─────
-
 def find_tex_files(project_dir: Path) -> list[Path]:
     return sorted(project_dir.rglob('*.tex'))
 
 
-# ── main ───────────────────────────────────────────────────────────────
+# ── subcommand: clean ──────────────────────────────────────────────────
 
-def main():
-    parser = argparse.ArgumentParser(
-        description='Manage unused entries in .bib files based on '
-                    '\\cite usage in .tex files. By default, auto-detects '
-                    'the main .tex file and writes a new "new_<name>.bib" '
-                    'for each bib file without touching the originals.'
-    )
-    parser.add_argument(
-        'project', type=str, nargs='?', default='.',
-        help='Path to the LaTeX project directory (default: current directory).'
-    )
-    parser.add_argument(
-        '--bib', type=str, default=None,
-        help='Specific .bib file to process (default: auto-discover from main .tex).'
-    )
-    parser.add_argument(
-        '--dry-run', action='store_true',
-        help='Print what would happen without modifying any files.'
-    )
-    parser.add_argument(
-        '--in-place', action='store_true',
-        help='Modify the original .bib file directly (default: write new_<name>.bib).'
-    )
-    parser.add_argument(
-        '--comment', action='store_true',
-        help='Comment out unused entries with %% instead of removing them.'
-    )
-    parser.add_argument(
-        '--keep', type=str, default='',
-        help='Comma-separated list of extra citation keys to preserve.'
-    )
-    parser.add_argument(
-        '--no-recursive', action='store_true',
-        help='Do not search subdirectories for .tex files '
-             '(\\input/\\include following is always active).'
-    )
-    args = parser.parse_args()
-
+def cmd_clean(args):
     project = Path(args.project).resolve()
     if not project.is_dir():
         print(f"Error: '{project}' is not a directory.", file=sys.stderr)
         sys.exit(1)
 
-    # ── 1. Find main .tex ──────────────────────────────────────────────
+    # 1. Find main .tex
     recursive = not args.no_recursive
     candidates = find_main_tex_candidates(project, recursive=recursive)
 
@@ -392,14 +338,14 @@ def main():
         tex_files = resolve_includes(main_tex, project)
         print()
 
-    # ── 2. Find .bib files ─────────────────────────────────────────────
+    # 2. Find .bib files
     bib_files = resolve_bib_files(project, main_tex, args.bib)
 
     if not bib_files:
         print("No .bib files found. Use --bib to specify one.", file=sys.stderr)
         sys.exit(1)
 
-    # ── 3. Extract citation keys ───────────────────────────────────────
+    # 3. Extract citation keys
     cited_keys: set[str] = set()
     for tf in tex_files:
         content = tf.read_text(encoding='utf-8', errors='replace')
@@ -419,7 +365,7 @@ def main():
     n_keys = len(cited_keys) if '*' not in cited_keys else '∞'
     print(f"Scanned {n_files} .tex file(s), found {n_keys} unique citation key(s).\n")
 
-    # ── 4. Process each .bib file ──────────────────────────────────────
+    # 4. Process each .bib file
     for bib_path in bib_files:
         print(f"--- {bib_path.name} ---")
         source_text = bib_path.read_text(encoding='utf-8', errors='replace')
@@ -481,6 +427,68 @@ def main():
         print(f"  Wrote to {output_path.name} ({len(unused)} entries {action_word}).\n")
 
     print("Done.")
+
+
+# ── main ───────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='bibkit',
+        description='A BibTeX toolbox for LaTeX projects.',
+    )
+    subparsers = parser.add_subparsers(dest='command', title='commands')
+
+    # --- bibkit clean ---
+    clean_parser = subparsers.add_parser(
+        'clean',
+        help='Remove or comment out unused entries in .bib files.',
+        description='Remove or comment out unused entries from .bib files '
+                    'based on actual \\cite usage in .tex files. '
+                    'By default, writes a new "new_<name>.bib" for each bib '
+                    'file without touching the originals.',
+    )
+    clean_parser.add_argument(
+        'project', type=str, nargs='?', default='.',
+        help='Path to the LaTeX project directory (default: current directory).'
+    )
+    clean_parser.add_argument(
+        '--bib', type=str, default=None,
+        help='Specific .bib file to process (default: auto-discover).'
+    )
+    clean_parser.add_argument(
+        '--dry-run', action='store_true',
+        help='Print what would happen without modifying any files.'
+    )
+    clean_parser.add_argument(
+        '--in-place', action='store_true',
+        help='Modify the original .bib file directly (default: write new_<name>.bib).'
+    )
+    clean_parser.add_argument(
+        '--comment', action='store_true',
+        help='Comment out unused entries with %% instead of removing them.'
+    )
+    clean_parser.add_argument(
+        '--keep', type=str, default='',
+        help='Comma-separated list of extra citation keys to preserve.'
+    )
+    clean_parser.add_argument(
+        '--no-recursive', action='store_true',
+        help='Do not search subdirectories for .tex files '
+             '(\\input/\\include following is always active).'
+    )
+
+    # --- Parse ---
+    args = parser.parse_args()
+
+    if args.command is None:
+        parser.print_help()
+        sys.exit(0)
+
+    if args.command == 'clean':
+        cmd_clean(args)
+    else:
+        parser.print_help()
+        sys.exit(1)
 
 
 if __name__ == '__main__':

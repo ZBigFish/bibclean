@@ -3,15 +3,15 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bibclean"
+name = "bibkit"
 version = "1.0.0"
-description = "A CLI tool to remove unused entries from BibTeX files based on actual \\cite usage in LaTeX projects."
+description = "A BibTeX toolbox for LaTeX projects — clean, merge, check, and more."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = [
-    "bibtex", "latex", "bibliography", "cite", "cleaner",
+    "bibtex", "latex", "bibliography", "cite", "tool",
     "cli", "research", "academic", "paper", "reference-management",
 ]
 classifiers = [
@@ -33,9 +33,9 @@ classifiers = [
 name = "ZBigFish"
 
 [project.urls]
-Homepage = "https://github.com/ZBigFish/bibclean"
-Repository = "https://github.com/ZBigFish/bibclean"
-Issues = "https://github.com/ZBigFish/bibclean/issues"
+Homepage = "https://github.com/ZBigFish/bibkit"
+Repository = "https://github.com/ZBigFish/bibkit"
+Issues = "https://github.com/ZBigFish/bibkit/issues"
 
 [project.scripts]
-bibclean = "bibclean.cli:main"
+bibkit = "bibkit.cli:main"

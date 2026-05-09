@@ -1,92 +1,86 @@
 <div align="center">
 
-# Bibclean: Automatically Remove Unused Entries from BibTeX Files
+# Bibkit: A BibTeX Toolbox for LaTeX Projects
 
 <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/tests-81%2F81%20passed-brightgreen?style=flat-square" alt="Tests">
-<img src="https://img.shields.io/github/license/ZBigFish/bibclean?style=flat-square" alt="License">
+<img src="https://img.shields.io/github/license/ZBigFish/bibkit?style=flat-square" alt="License">
 <img src="https://img.shields.io/badge/platform-cross--platform-lightgrey?style=flat-square" alt="Platform">
 
 </div>
 
 > 中文文档：[README_CN.md](README_CN.md)
 
-**Bibclean** scans your LaTeX project, extracts every `\cite{...}` key actually used, and removes (or comments out) unused entries from your `.bib` files. No more bloated bibliography files with hundreds of uncited references.
+**Bibkit** is a command-line toolbox for managing BibTeX (`.bib`) files in LaTeX projects. It analyzes your `.tex` source to understand what references are actually used, and provides utilities to keep your bibliography clean and consistent.
 
 ---
 
 ## Table of Contents
 
-- [Features](#features)
 - [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage Examples](#usage-examples)
-  - [1. Default: generate a cleaned new file](#1-default-generate-a-cleaned-new-file)
-  - [2. Comment mode: preserve bib structure](#2-comment-mode-preserve-bib-structure)
-  - [3. In-place modification](#3-in-place-modification)
-  - [4. Protect specific entries](#4-protect-specific-entries)
-  - [5. Multi-version projects](#5-multi-version-projects)
-  - [6. Specify a bib file](#6-specify-a-bib-file)
-  - [7. Limit search scope](#7-limit-search-scope)
-- [Mode Reference](#mode-reference)
+- [Commands](#commands)
+  - [`bibkit clean`](#bibkit-clean)
+- [Roadmap](#roadmap)
 - [Supported Citation Commands](#supported-citation-commands)
 - [Supported BibTeX Features](#supported-bibtex-features)
-- [How It Works](#how-it-works)
-- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## Features
-
-| | |
-|---|---|
-| **Zero-config default** | Run `bibclean` with no arguments — auto-detects the main `.tex`, finds the right `.bib`, and produces a cleaned copy. |
-| **Main file auto-detection** | Scans for `\documentclass` to identify the entry point. Prompts for choice when multiple versions exist. |
-| **Non-destructive by default** | Writes a new `new_XXX.bib` file. Never touches your originals unless you explicitly ask. |
-| **`\input`/`\include` following** | Recursively resolves included sub-files to collect all citations across the entire project. |
-| **Bib auto-discovery** | Reads `\bibliography{...}` and `\addbibresource{...}` from your main `.tex` to find which `.bib` files are in use. |
-| **`crossref` dependency chain** | Automatically keeps cross-referenced parent entries (transitive closure). |
-| **Comment mode** | `--comment` comments out unused entries with `%` instead of deleting them — preserving your original bib structure. |
-| **Safe preview** | `--dry-run` shows exactly what would change before touching any files. |
-
-No external dependencies — just **Python 3.10+**.
-
 ## Installation
 
 ```bash
-# From source (editable install)
-git clone https://github.com/ZBigFish/bibclean.git
-cd bibclean
+git clone https://github.com/ZBigFish/bibkit.git
+cd bibkit
 pip install -e .
 ```
 
-After installation, the `bibclean` command is available globally. You can also run `python -m bibclean`.
+The `bibkit` command is available globally after installation. You can also use `python -m bibkit`.
 
-## Quick Start
+## Commands
+
+### `bibkit clean`
+
+Remove or comment out unused entries from your `.bib` files based on actual `\cite` usage.
 
 ```bash
 # Run from your LaTeX project root
-cd /path/to/my-paper
-bibclean
+bibkit clean
 
-# Or specify the project path
-bibclean /path/to/my-paper
+# Or specify a path
+bibkit clean /path/to/my-paper
 
-# Preview before making changes
-bibclean --dry-run
+# Preview first
+bibkit clean --dry-run
 ```
 
-## Usage Examples
+**Features:**
+- Auto-detects the main `.tex` via `\documentclass`; prompts for choice when multiple versions exist
+- Recursively follows `\input`/`\include` to collect all citations across sub-files
+- Auto-discovers `.bib` files from `\bibliography{...}` and `\addbibresource{...}`
+- Non-destructive by default — writes a `new_XXX.bib`, never touches originals
+- `crossref` parent entries are kept automatically (transitive resolution)
+- Handles `\nocite{*}` — all entries preserved
 
-### 1. Default: generate a cleaned new file
+**Options:**
 
-```bash
-bibclean /path/to/paper-project
+| Flag | Effect |
+|---|---|
+| *(none)* | Write `new_XXX.bib` with unused entries removed |
+| `--comment` | Comment out unused entries with `%` instead of removing |
+| `--in-place` | Modify the original `.bib` file directly |
+| `--in-place --comment` | Modify original, comment out unused |
+| `--dry-run` | Preview only — no files changed |
+| `--keep "key1,key2"` | Comma-separated list of keys to always preserve |
+| `--bib references.bib` | Process a specific bib file (overrides auto-discovery) |
+| `--no-recursive` | Don't search subdirectories for `.tex` files |
+
+**Example output:**
+
 ```
+$ bibkit clean /path/to/paper
 
-```
 Main file: main.tex
   (with 7 included .tex file(s))
 
@@ -104,85 +98,20 @@ Scanned 8 .tex file(s), found 55 unique citation key(s).
 Done.
 ```
 
-The original `refs.bib` (75 entries) is untouched. `new_refs.bib` (55 entries) is the cleaned result.
+## Roadmap
 
-### 2. Comment mode: preserve bib structure
+Commands planned for future releases:
 
-```bash
-bibclean /path/to/paper-project --comment
-```
+| Command | Description |
+|---|---|
+| `bibkit clean` | **Done.** Remove unused entries from `.bib` files |
+| `bibkit merge` | Merge multiple `.bib` files with deduplication |
+| `bibkit check` | Validate `.bib` entries (missing fields, malformed keys, broken crossrefs) |
+| `bibkit sort` | Sort entries by key, author, or year |
+| `bibkit fmt`  | Normalize formatting (capitalize titles, unify venue abbreviations) |
+| `bibkit diff` | Show differences between two `.bib` files |
 
-Unused entries get `% ` prefixed to every line; cited entries remain unchanged:
-
-```bib
-% @article{goodfellow2014generative,
-%   title={Generative adversarial nets},
-%   author={Goodfellow, Ian and ...},
-%   ...
-% }
-
-@inproceedings{he2016deep,
-  title={Deep residual learning for image recognition},
-  ...
-}
-```
-
-`@string`, `@comment`, and `@preamble` blocks are always preserved as-is.
-
-### 3. In-place modification
-
-```bash
-# Remove unused entries directly from the original file
-bibclean --in-place
-
-# Comment out unused entries in the original file
-bibclean --in-place --comment
-```
-
-### 4. Protect specific entries
-
-```bash
-# Keep selected keys even if not cited
-bibclean --keep "lecun1998gradient,kingma2013auto"
-```
-
-### 5. Multi-version projects
-
-When multiple `.tex` files with `\documentclass` are found (e.g., paper revisions), you'll be prompted:
-
-```
-Multiple main .tex files detected:
-
-  [1] paper_v1.tex
-  [2] paper_v2_final.tex
-
-Select main file [1-2]:
-```
-
-### 6. Specify a bib file
-
-```bash
-# Override auto-discovery
-bibclean --bib references.bib
-```
-
-### 7. Limit search scope
-
-```bash
-# Don't search subdirectories for .tex files
-# (still follows \input/\include from the main .tex)
-bibclean --no-recursive
-```
-
-## Mode Reference
-
-| Flags | Output File | Action on Unused |
-|---|---|---|
-| *(none)* | `new_XXX.bib` | Remove |
-| `--comment` | `new_XXX.bib` | Comment with `%` |
-| `--in-place` | Original file | Remove |
-| `--in-place --comment` | Original file | Comment with `%` |
-| `--dry-run` *(with any)* | None | Preview only |
+Have a feature request? [Open an issue](https://github.com/ZBigFish/bibkit/issues).
 
 ## Supported Citation Commands
 
@@ -199,57 +128,13 @@ Supports optional arguments (`\cite[page 3]{key}`), multi-key (`\cite{key1,key2}
 - Nested braces in field values (`{CNN}`, `{\L}ukasz`) handled correctly
 - `crossref` fields resolved transitively — parent entries kept automatically
 
-## How It Works
+## Contributing
 
-```
-Project directory
-  │
-  ├─ Find .tex files with \documentclass ──→ main.tex
-  │
-  ├─ Resolve \input{...} / \include{...} ──→ all .tex files
-  │
-  ├─ Extract \cite{...} keys ──────────────→ cited keys set
-  │
-  ├─ Read \bibliography{...} from main ────→ .bib file(s)
-  │
-  ├─ Parse .bib entries ───────────────────→ entry map
-  │
-  └─ Filter: keep cited + crossref chain ──→ new_XXX.bib
-```
-
-## Testing
-
-```bash
-python tests/test_bib_cleaner.py
-# Expected: 81/81 passed — all passed!
-```
-
-21 test cases covering all modes, edge cases, crossref chains, special characters, and citation pattern variants.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=ZBigFish/bibclean&type=Date)](https://star-history.com/#ZBigFish/bibclean&Date)
-
-## Contributing
-
-Contributions are welcome! Whether it's a bug fix, a new feature, or a documentation improvement — feel free to open a pull request.
-
-```bash
-# fork & clone
-git clone https://github.com/YOUR_USERNAME/bibclean.git
-cd bibclean
-pip install -e .
-
-# create a branch for your change
-git checkout -b feat/my-feature
-
-# run the test suite to make sure everything passes
-python tests/test_bib_cleaner.py
-
-# commit & push, then open a PR on GitHub
-```
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+[![Star History Chart](https://api.star-history.com/svg?repos=ZBigFish/bibkit&type=Date)](https://star-history.com/#ZBigFish/bibkit&Date)
 
 ## License
 
