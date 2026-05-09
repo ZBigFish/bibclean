@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bibclean"
+version = "1.0.0"
+description = "Remove unused entries from .bib files based on actual \\cite usage in .tex files."
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+
+[project.scripts]
+bibclean = "bibclean.cli:main"
