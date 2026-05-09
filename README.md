@@ -100,16 +100,14 @@ Done.
 
 ## Roadmap
 
-Commands planned for future releases:
-
-| Command | Description |
-|---|---|
-| `bibkit clean` | **Done.** Remove unused entries from `.bib` files |
-| `bibkit merge` | Merge multiple `.bib` files with deduplication |
-| `bibkit check` | Validate `.bib` entries (missing fields, malformed keys, broken crossrefs) |
-| `bibkit sort` | Sort entries by key, author, or year |
-| `bibkit fmt`  | Normalize formatting (capitalize titles, unify venue abbreviations) |
-| `bibkit diff` | Show differences between two `.bib` files |
+| Command | Status | Description |
+|---|---|---|
+| `bibkit clean` | Done | Remove unused entries from `.bib` files |
+| `bibkit merge` | Planned | Merge multiple `.bib` files with deduplication |
+| `bibkit check` | Planned | Validate `.bib` entries (missing fields, malformed keys, broken crossrefs) |
+| `bibkit sort` | Planned | Sort entries by key, author, or year |
+| `bibkit fmt`  | Planned | Normalize formatting (capitalize titles, unify venue abbreviations) |
+| `bibkit diff` | Planned | Show differences between two `.bib` files |
 
 Have a feature request? [Open an issue](https://github.com/ZBigFish/bibkit/issues).
 

@@ -78,16 +78,14 @@ bibkit clean --dry-run
 
 ## 路线图
 
-计划中的未来命令：
-
-| 命令 | 说明 |
-|---|---|
-| `bibkit clean` | **已完成。** 移除 `.bib` 文件中未使用的条目 |
-| `bibkit merge` | 合并多个 `.bib` 文件并去重 |
-| `bibkit check` | 校验 `.bib` 条目（缺失字段、格式错误、断开的 crossref） |
-| `bibkit sort` | 按键、作者或年份排序条目 |
-| `bibkit fmt`  | 标准化格式（标题大小写、统一会议缩写） |
-| `bibkit diff` | 对比两个 `.bib` 文件的差异 |
+| 命令 | 状态 | 说明 |
+|---|---|---|
+| `bibkit clean` | 已完成 | 移除 `.bib` 文件中未使用的条目 |
+| `bibkit merge` | 计划中 | 合并多个 `.bib` 文件并去重 |
+| `bibkit check` | 计划中 | 校验 `.bib` 条目（缺失字段、格式错误、断开的 crossref） |
+| `bibkit sort` | 计划中 | 按键、作者或年份排序条目 |
+| `bibkit fmt`  | 计划中 | 标准化格式（标题大小写、统一会议缩写） |
+| `bibkit diff` | 计划中 | 对比两个 `.bib` 文件的差异 |
 
 有功能需求？[提交 Issue](https://github.com/ZBigFish/bibkit/issues)。
 
